@@ -56,17 +56,22 @@
             appendMessage('Tú', userMessage);
             inputField.value = '';
 
-            const response = await fetch('/.netlify/functions/athleticgpt', {  // Cambié la URL aquí
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: userMessage })
-            });
+            try {
+                const response = await fetch('/.netlify/functions/athleticgpt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: userMessage })  // Asegúrate de que aquí estamos enviando "prompt"
+                });
 
-            const data = await response.json();
-            const aiMessage = data.reply;
-            appendMessage('AthleticGPT', aiMessage);
+                const data = await response.json();
+                const aiMessage = data.message;
+                appendMessage('AthleticGPT', aiMessage);
+            } catch (error) {
+                console.error(error);
+                appendMessage('AthleticGPT', 'Hubo un error al procesar tu solicitud.');
+            }
         }
 
         function appendMessage(sender, message) {
