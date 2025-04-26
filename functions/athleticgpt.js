@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
+  // Aseguramos que el 'prompt' se está recibiendo bien
   const { prompt } = JSON.parse(event.body || '{}');
 
   if (!prompt) {
@@ -11,6 +12,7 @@ exports.handler = async (event) => {
   }
 
   try {
+    // Llamada a la API de OpenAI para generar la respuesta
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -32,14 +34,22 @@ exports.handler = async (event) => {
       })
     });
 
+    // Verificamos si la respuesta fue exitosa y procesamos el mensaje
     const data = await response.json();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: data.choices[0].message.content })
-    };
+    if (data.choices && data.choices.length > 0) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: data.choices[0].message.content })
+      };
+    } else {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'No valid response from OpenAI.' })
+      };
+    }
   } catch (error) {
-    console.error(error);
+    console.error('Error al generar la respuesta:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Error generating response.' })
